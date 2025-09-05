@@ -1,13 +1,50 @@
 // lib/contract-config.js
 
 // TODO: PASTE YOUR DEPLOYED SupplyChain CONTRACT ADDRESS HERE
-export const contractAddress = "0xcfeD223fAb2A41b5a5a5F9AaAe2D1e882cb6Fe2D";
+export const contractAddress = "0x74e3FC764c2474f25369B9d021b7F92e8441A2Dc";
 
 export const supplyChainAbi = [
   {
       "inputs": [],
       "stateMutability": "nonpayable",
       "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "claimId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "claimant",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "sensorType",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "sensorValue",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        }
+      ],
+      "name": "InsuranceClaimFiled",
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -310,6 +347,30 @@ export const supplyChainAbi = [
     {
       "inputs": [
         {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "claimsByFarmer",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "string",
           "name": "_name",
           "type": "string"
@@ -326,6 +387,24 @@ export const supplyChainAbi = [
         }
       ],
       "name": "createProduct",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_sensorType",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_sensorValue",
+          "type": "string"
+        }
+      ],
+      "name": "fileInsuranceClaim",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -366,6 +445,57 @@ export const supplyChainAbi = [
           "internalType": "struct Roles.ActorProfile",
           "name": "",
           "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_farmerAddress",
+          "type": "address"
+        }
+      ],
+      "name": "getClaimsByFarmer",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "claimId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "claimant",
+              "type": "address"
+            },
+            {
+              "internalType": "string",
+              "name": "sensorType",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "sensorValue",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "timestamp",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "status",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct SupplyChain.InsuranceClaim[]",
+          "name": "",
+          "type": "tuple[]"
         }
       ],
       "stateMutability": "view",
@@ -454,6 +584,50 @@ export const supplyChainAbi = [
           "internalType": "struct Products.Product",
           "name": "",
           "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "insuranceClaims",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "claimId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "claimant",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "sensorType",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "sensorValue",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "status",
+          "type": "string"
         }
       ],
       "stateMutability": "view",

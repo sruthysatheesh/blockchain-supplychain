@@ -8,6 +8,9 @@ import { useRouter } from 'next/navigation';
 import { contractAddress, supplyChainAbi } from "../../lib/contract-config";
 import { Leaf, LogOut, Wallet, PlusCircle, Package, Truck, Loader2, PackagePlus, Search, X, ArrowRight, Warehouse, Building, ShoppingBasket, Factory, QrCode, CheckCircle as CheckCircleIcon } from "lucide-react";
 import QRCode from 'qrcode';
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+} from "recharts";
 
 export default function FarmerDashboard() {
   const { user, logout, loading: authLoading } = useAuth();
@@ -46,7 +49,22 @@ export default function FarmerDashboard() {
   // Static data
   const units = ['g', 'kg', 'quintal', 'tonne'];
   const shippableRoles = ['Collection Point', 'Warehouse', 'Processing Unit', 'Retailer'];
+    const [liveData, setLiveData] = useState([]);
 
+    //graph from sensors 
+    useEffect(() => {
+    const fetchSheetData = async () => {
+        try {
+            const res = await fetch("https://script.google.com/macros/s/AKfycbxm1V-sNB2PiwhlPsaVZLIDE3BYkAHdkBbwIr3hiYi26FZ5TGtTnZRohnWmMmhgc1vK/exec?type=json");
+            const json = await res.json();
+            setLiveData(json.map(entry => ({...entry, timestamp: new Date(entry.timestamp).toLocaleTimeString(), temperature: Number(entry.temperature), humidity: Number(entry.humidity), soil: Number(entry.soil), rain: Number(entry.rain) })));
+        } catch(error) { console.error("Failed to fetch live sensor data:", error); }
+    };
+    fetchSheetData();
+    const interval = setInterval(fetchSheetData, 10000);
+    return () => clearInterval(interval);
+  }, []);
+  
   // Fetch user's registered farms from the backend
   useEffect(() => {
     if (user) {
@@ -147,6 +165,12 @@ export default function FarmerDashboard() {
       return groupedByDate;
   }, [allProducts, selectedFarm]);
 
+  
+
+  const graphBlock = (title, color, dataKey) => (
+    <div className="bg-white p-4 rounded-lg shadow-sm border"><h3 className="text-lg font-semibold mb-4 text-gray-700">{title}</h3><div className="w-full h-[250px]"><ResponsiveContainer width="100%" height="100%"><LineChart data={liveData}><CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" /><XAxis dataKey="timestamp" fontSize={12} tick={{ fill: '#666' }} /><YAxis domain={['dataMin - 2', 'dataMax + 2']} fontSize={12} tick={{ fill: '#666' }} /><Tooltip /><Line type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2} dot={false} /></LineChart></ResponsiveContainer></div></div>
+  );
+
   // Handlers for blockchain transactions and UI events
   const handleGenerateQrCode = async (product) => {
     const url = `${window.location.origin}/scan-product?id=${product.productId.toString()}`;
@@ -240,6 +264,17 @@ export default function FarmerDashboard() {
                             <button onClick={() => setSelectedFarm(null)} className="text-sm font-semibold text-blue-600 hover:underline">Change Farm</button>
                         </div>
                     </div>
+
+                    <div className="mb-8">
+    <h2 className="text-2xl font-bold text-gray-800 mb-4">Live Farm Conditions</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {graphBlock("Temperature (°C)", "#ef4444", "temperature")}
+        {graphBlock("Humidity (%)", "#3b82f6", "humidity")}
+        {graphBlock("Soil Moisture", "#a16207", "soil")}
+        {graphBlock("Rainfall", "#6b7280", "rain")}
+    </div>
+</div>
+
                     <div className="bg-white p-6 rounded-xl shadow-md mb-8">
                         <div className="border-b border-gray-200 mb-6">
                             <nav className="flex gap-6">

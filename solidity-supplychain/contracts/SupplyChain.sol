@@ -18,6 +18,32 @@ contract SupplyChain is
     IProcessingUnit,
     IRetailer
 {
+    // --- Insurance Claim Additions Start ---
+
+    struct InsuranceClaim {
+        uint256 claimId;
+        address claimant; // The farmer's farm address
+        string sensorType;
+        string sensorValue;
+        uint256 timestamp;
+        string status; // e.g., "Filed", "Reviewed", "Paid"
+    }
+
+    event InsuranceClaimFiled(
+        uint256 claimId,
+        address indexed claimant,
+        string sensorType,
+        string sensorValue,
+        uint256 timestamp
+    );
+
+    uint256 private claimCounter;
+    mapping(uint256 => InsuranceClaim) public insuranceClaims;
+    mapping(address => uint256[]) public claimsByFarmer;
+
+    // --- Insurance Claim Additions End ---
+
+
     constructor() {
         owner = msg.sender;
         _grantInitialAdmin(msg.sender);
@@ -189,6 +215,41 @@ contract SupplyChain is
         
         emit ProductCreated(newId, 0, _newProductName, _newQuantity);
     }
+
+    // --- Insurance Claim Functions Start ---
+
+    function fileInsuranceClaim(
+        string memory _sensorType,
+        string memory _sensorValue
+    ) public override onlyRole(Role.FARM) {
+        uint256 id = claimCounter++;
+        
+        insuranceClaims[id] = InsuranceClaim(
+            id,
+            msg.sender,
+            _sensorType,
+            _sensorValue,
+            block.timestamp,
+            "Filed"
+        );
+
+        claimsByFarmer[msg.sender].push(id);
+
+        emit InsuranceClaimFiled(id, msg.sender, _sensorType, _sensorValue, block.timestamp);
+    }
+
+    function getClaimsByFarmer(address _farmerAddress) external view returns (InsuranceClaim[] memory) {
+        uint256[] memory claimIds = claimsByFarmer[_farmerAddress];
+        InsuranceClaim[] memory claims = new InsuranceClaim[](claimIds.length);
+
+        for (uint i = 0; i < claimIds.length; i++) {
+            claims[i] = insuranceClaims[claimIds[i]];
+        }
+
+        return claims;
+    }
+
+    // --- Insurance Claim Functions End ---
 
     function _addHistory(uint256 _productId, string memory _details) internal {
         products[_productId].history.push(HistoryEvent(msg.sender, roles[msg.sender], block.timestamp, _details));
