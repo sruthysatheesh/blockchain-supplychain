@@ -4,9 +4,9 @@ import { ethers } from "ethers";
 import Footer from "../../components/Footer/page";
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from '../../context/AuthContext';
+import { Leaf, LogOut, Wallet, PlusCircle, Package, Truck, Loader2, PackagePlus, Search, X, ArrowRight, Warehouse, Building, ShoppingBasket, Factory, QrCode, CheckCircle as CheckCircleIcon, Shield } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { contractAddress, supplyChainAbi } from "../../lib/contract-config";
-import { Leaf, LogOut, Wallet, PlusCircle, Package, Truck, Loader2, PackagePlus, Search, X, ArrowRight, Warehouse, Building, ShoppingBasket, Factory, QrCode, CheckCircle as CheckCircleIcon } from "lucide-react";
 import QRCode from 'qrcode';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -221,10 +221,15 @@ export default function FarmerDashboard() {
                     <div className="md:w-1/2">
                         <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Welcome, {user.name}!</h1>
                         <p className="text-lg text-gray-600 mb-6">Manage your farm's supply chain data, track shipments, and receive instant payments—all in one secure blockchain-powered platform.</p>
-                        <div className="flex gap-4">
-                            <Link href="/register-farm" className="bg-green-600 text-white hover:bg-green-700 rounded-full px-6 py-3 text-sm font-semibold">Register New Farm</Link>
-                            <a href="#farm-management" className="bg-white text-green-600 hover:bg-gray-100 rounded-full px-6 py-3 text-sm font-semibold border border-green-600">Manage Products</a>
-                        </div>
+                        
+                            <div className="flex flex-wrap gap-4">
+    <Link href="/register-farm" className="bg-green-600 text-white hover:bg-green-700 rounded-full px-6 py-3 text-sm font-semibold">Register New Farm</Link>
+    <a href="#farm-management" className="bg-white text-green-600 hover:bg-gray-100 rounded-full px-6 py-3 text-sm font-semibold border border-green-600">Manage Products</a>
+    <Link href="/farmer/insurance-claim" className="bg-blue-600 text-white hover:bg-blue-700 rounded-full px-6 py-3 text-sm font-semibold flex items-center gap-2">
+        <Shield className="w-4 h-4" />
+        Insurance Claim
+    </Link>
+</div>
                     </div>
                     <div className="md:w-1/2">
                         <img src="https://plus.unsplash.com/premium_photo-1682125843235-8b31e5800095?q=80&w=2070&auto=format&fit=crop" alt="Farmer" className="rounded-lg shadow-lg" />
