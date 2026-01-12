@@ -1,10 +1,31 @@
 // lib/contract-config.js
 
-// TODO: PASTE YOUR DEPLOYED SupplyChain CONTRACT ADDRESS HERE
-export const contractAddress = "0x74e3FC764c2474f25369B9d021b7F92e8441A2Dc";
+// TODO: set REACT_APP_CONTRACT_ADDRESS to your deployed SupplyChain contract address.
+// Fallback to the existing default (common Hardhat default used in many dev setups).
+export const DEFAULT_CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+export const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS || DEFAULT_CONTRACT_ADDRESS;
+
+/**
+ * Ensure there's contract bytecode at the configured address.
+ * Call this before interacting with view/nonpayable methods to get a clearer error.
+ * Usage example (caller must provide an ethers Provider):
+ *   await assertContractDeployed(provider);
+ */
+export async function assertContractDeployed(provider, address = contractAddress) {
+	// provider: ethers.providers.Provider (or any object with getCode)
+	const code = await provider.getCode(address);
+	if (!code || code === "0x" || code === "0x0") {
+		throw new Error(
+			`No contract found at ${address} (provider.getCode returned ${code}). ` +
+			`Check you are connected to the correct network and that REACT_APP_CONTRACT_ADDRESS is set to the deployed address. ` +
+			`This is the usual cause of "could not decode result data (value=\"0x\")" errors.`
+		);
+	}
+	return true;
+}
 
 export const supplyChainAbi = [
-  {
+      {
       "inputs": [],
       "stateMutability": "nonpayable",
       "type": "constructor"
@@ -170,6 +191,25 @@ export const supplyChainAbi = [
         }
       ],
       "name": "RoleGranted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "oldAccount",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newAccount",
+          "type": "address"
+        }
+      ],
+      "name": "SensorServiceAccountUpdated",
       "type": "event"
     },
     {
@@ -405,6 +445,29 @@ export const supplyChainAbi = [
         }
       ],
       "name": "fileInsuranceClaim",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_farmAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "_sensorType",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_sensorValue",
+          "type": "string"
+        }
+      ],
+      "name": "fileInsuranceClaimFor",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -828,6 +891,50 @@ export const supplyChainAbi = [
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_sourceProductId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_quantityToSell",
+          "type": "uint256"
+        }
+      ],
+      "name": "sellProduct",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "sensorServiceAccount",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_serviceAccount",
+          "type": "address"
+        }
+      ],
+      "name": "setSensorServiceAccount",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {

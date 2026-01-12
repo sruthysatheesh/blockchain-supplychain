@@ -48,33 +48,41 @@ export default function InsuranceClaim() {
     rain: { normal: 10, drought: 2, flood: 50 }
   };
 
-  // Fetch sensor data (same as farmer dashboard)
+  // Fetch sensor data based on the logged-in user's farm
   useEffect(() => {
-    const fetchSensorData = async () => {
-      setIsLoadingSensorData(true);
-      try {
-        const res = await fetch("https://script.google.com/macros/s/AKfycbxm1V-sNB2PiwhlPsaVZLIDE3BYkAHdkBbwIr3hiYi26FZ5TGtTnZRohnWmMmhgc1vK/exec?type=json");
-        const json = await res.json();
-        const processedData = json.map(entry => ({
-          ...entry,
-          timestamp: new Date(entry.timestamp),
-          temperature: Number(entry.temperature),
-          humidity: Number(entry.humidity),
-          soil: Number(entry.soil),
-          rain: Number(entry.rain)
-        }));
-        setSensorData(processedData);
-      } catch (error) {
-        console.error("Failed to fetch sensor data:", error);
-      } finally {
-        setIsLoadingSensorData(false);
-      }
-    };
+    if (user && user._id) {
+      const fetchSensorData = async () => {
+        setIsLoadingSensorData(true);
+        try {
+          // Fetch data from the same API endpoint as the farmer dashboard
+          const res = await fetch(`/api/sensor-data?farmId=${user._id}`);
+          if (!res.ok) {
+            throw new Error(`Failed to fetch sensor data: ${res.statusText}`);
+          }
+          const json = await res.json();
+          
+          // Process data to ensure correct types
+          const processedData = json.map(entry => ({
+            ...entry,
+            timestamp: new Date(entry.timestamp),
+            temperature: Number(entry.temperature),
+            humidity: Number(entry.humidity),
+            soil: Number(entry.soil),
+            rain: Number(entry.rain)
+          }));
+          setSensorData(processedData);
+        } catch (error) {
+          console.error("Failed to fetch sensor data:", error);
+        } finally {
+          setIsLoadingSensorData(false);
+        }
+      };
 
-    fetchSensorData();
-    const interval = setInterval(fetchSensorData, 30000); // Update every 30 seconds
-    return () => clearInterval(interval);
-  }, []);
+      fetchSensorData();
+      const interval = setInterval(fetchSensorData, 30000); // Update every 30 seconds
+      return () => clearInterval(interval);
+    }
+  }, [user]);
 
   // Validate sensor conditions based on claim type
   const validateSensorConditions = (claimType) => {

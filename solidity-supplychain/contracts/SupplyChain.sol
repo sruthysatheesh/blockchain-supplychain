@@ -49,6 +49,14 @@ contract SupplyChain is
         _grantInitialAdmin(msg.sender);
     }
 
+    // --- NEW: Function to set the sensor service account (only owner can call) ---
+    function setSensorServiceAccount(address _serviceAccount) public onlyOwner {
+        require(_serviceAccount != address(0), "Service account cannot be zero address");
+        address oldAccount = sensorServiceAccount;
+        sensorServiceAccount = _serviceAccount;
+        emit SensorServiceAccountUpdated(oldAccount, _serviceAccount);
+    }
+
     function _grantRole(address _actor, Role _role) internal {
         require(!isRegistered[_actor], "Address is already registered with a role.");
         roles[_actor] = _role;
@@ -110,7 +118,7 @@ contract SupplyChain is
         emit ProductCreated(id, 0, _name, _quantity);
     }
 
-    function splitAndShip(uint256 _sourceProductId, uint256 _quantity, address _destination) public override(IFarm, ICollectionPoint, IWarehouse, IProcessingUnit) {
+    function splitAndShip(uint256 _sourceProductId, uint256 _quantity, address _destination) public override(IFarm, ICollectionPoint, IWarehouse, IProcessingUnit, IRetailer) {
         Product storage sourceProduct = products[_sourceProductId];
         require(sourceProduct.currentOwner == msg.sender, "Caller is not owner of source product.");
         require(sourceProduct.quantity >= _quantity, "Insufficient quantity in source product.");
@@ -146,6 +154,23 @@ contract SupplyChain is
         _addHistory(_productId, "Received by new owner");
         emit ProductReceived(_productId, msg.sender);
         emit ProductStateChanged(_productId, p.currentState);
+    }
+
+    // --- Retailer-only action: sell a quantity of a product ---
+    function sellProduct(uint256 _sourceProductId, uint256 _quantityToSell) public override onlyRole(Role.RETAILER) {
+        Product storage p = products[_sourceProductId];
+        require(p.currentOwner == msg.sender, "Caller is not owner of product.");
+        require(p.currentState == State.AT_RETAILER, "Product not at retailer.");
+        require(p.quantity >= _quantityToSell, "Insufficient quantity to sell.");
+
+        p.quantity -= _quantityToSell;
+
+        _addHistory(_sourceProductId, string.concat("Sold ", uint2str(_quantityToSell), " ", p.unit));
+
+        if (p.quantity == 0) {
+            p.currentState = State.SOLD;
+            emit ProductStateChanged(_sourceProductId, p.currentState);
+        }
     }
     
     function processProduct(
@@ -218,6 +243,7 @@ contract SupplyChain is
 
     // --- Insurance Claim Functions Start ---
 
+    // Original function - farm files their own claim
     function fileInsuranceClaim(
         string memory _sensorType,
         string memory _sensorValue
@@ -236,6 +262,30 @@ contract SupplyChain is
         claimsByFarmer[msg.sender].push(id);
 
         emit InsuranceClaimFiled(id, msg.sender, _sensorType, _sensorValue, block.timestamp);
+    }
+
+    // --- NEW: Service account files claim on behalf of a farm ---
+    function fileInsuranceClaimFor(
+        address _farmAddress,
+        string memory _sensorType,
+        string memory _sensorValue
+    ) public onlySensorService {
+        require(roles[_farmAddress] == Role.FARM, "Target address is not a registered farm");
+        
+        uint256 id = claimCounter++;
+        
+        insuranceClaims[id] = InsuranceClaim(
+            id,
+            _farmAddress,
+            _sensorType,
+            _sensorValue,
+            block.timestamp,
+            "Filed"
+        );
+
+        claimsByFarmer[_farmAddress].push(id);
+
+        emit InsuranceClaimFiled(id, _farmAddress, _sensorType, _sensorValue, block.timestamp);
     }
 
     function getClaimsByFarmer(address _farmerAddress) external view returns (InsuranceClaim[] memory) {

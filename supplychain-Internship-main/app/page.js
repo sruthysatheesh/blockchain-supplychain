@@ -269,9 +269,7 @@ export default function Home() {
 
       <section className="relative w-full">
         <div className="absolute inset-0 z-0">
-          <img
-            src="https://steg.cepr.org/sites/default/files/styles/wysiwyg_half_image/public/2023-04/TheMacroeconomicsOfIntensiveAgriculture.jpeg?itok=WIniKmO8"
-            alt="Agricultural field with tractor" className="w-full h-full z-0  object-fill  blur-[1px]"/>
+          
           <div className="absolute inset-0 0" />
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 lg:px-20 py-16 md:py-24 lg:py-40">

@@ -8,6 +8,9 @@ pragma solidity ^0.8.20;
  */
 contract Roles {
     address public owner; // The contract deployer, the "super admin"
+    
+    // --- NEW: Service Account for automated sensor claims ---
+    address public sensorServiceAccount;
 
     // Defines all possible roles in the system.
     enum Role { 
@@ -39,6 +42,8 @@ contract Roles {
     event RoleGranted(address indexed actor, Role role);
     // --- NEW: Event for profile updates ---
     event ProfileUpdated(address indexed actor, string name);
+    // --- NEW: Event for service account changes ---
+    event SensorServiceAccountUpdated(address indexed oldAccount, address indexed newAccount);
 
 
     // --- Modifiers ---
@@ -54,6 +59,12 @@ contract Roles {
 
     modifier onlyRole(Role _role) {
         require(roles[msg.sender] == _role, "Caller does not have the required role");
+        _;
+    }
+    
+    // --- NEW: Modifier for sensor service account ---
+    modifier onlySensorService() {
+        require(msg.sender == sensorServiceAccount, "Caller is not the authorized sensor service");
         _;
     }
 }

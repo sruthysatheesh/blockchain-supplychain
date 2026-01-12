@@ -123,7 +123,7 @@ export default function RegisterFarm() {
             </div>
             <div className="md:w-1/2">
               <img
-                src="https://images.unsplash.com/photo-1605000797499-95a51c5269ae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80"
+                src="/public/green.jpg"
                 alt="Farm registration"
                 className="rounded-lg shadow-lg w-full object-cover"
               />
